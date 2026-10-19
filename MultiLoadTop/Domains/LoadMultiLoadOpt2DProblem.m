@@ -1,5 +1,5 @@
 function [NODE, ELEM, SUPP, LOAD, DISP, pass_solid, pass_void, rmin] ...
-    = LoadMultiLoadOpt2DPlaneProblem(problemID)
+    = LoadMultiLoadOpt2DProblem(problemID)
 
 % Load problem
 switch problemID
@@ -167,7 +167,7 @@ end
 %% Passive elements 
 Nfunc = @ShapeFuncQ4;
 dNfunc = @ShapeDerivQ4;
-intOrder = 1;
+intOrder = 2;
 CM = GetElementCM2(NODE,ELEM,[],Nfunc,dNfunc,intOrder);
 pass_solid = CM(:,2) < H/2 + h &  CM(:,2) > H/2 - h ; 
 pass_void = false(nx*ny, 1); 
@@ -268,7 +268,7 @@ end
 %% Passive elements 
 Nfunc = @ShapeFuncQ4;
 dNfunc = @ShapeDerivQ4;
-intOrder = 1;
+intOrder = 2;
 CM = GetElementCM2(NODE,ELEM,[],Nfunc,dNfunc,intOrder);
 pass_solid = CM(:,2)  < H/10 + tol & CM(:,2)  > H/10 -d - tol | ...
              CM(:,2)  < 2*H/10 + tol & CM(:,2)  > 2*H/10 -d - tol | ...

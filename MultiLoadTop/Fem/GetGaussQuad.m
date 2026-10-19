@@ -13,4 +13,4 @@ switch order
 end
 GP_N = length(GP_w);
 
-return
+end

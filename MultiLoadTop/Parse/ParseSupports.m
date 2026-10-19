@@ -13,10 +13,13 @@ if ~isempty(SUPP)
     suppVAL = SUPP(sub2ind(size(SUPP),i,j+1));
     if isrow(j), j = j'; suppVAL = suppVAL'; end
     suppDOF = DpN*(SUPP(i,1)-1) + j;
-    
+    suppVAL = accumarray(suppDOF,suppVAL);
+    suppDOF = unique(suppDOF);
+    suppVAL = suppVAL(suppDOF);
     [suppDOF,order] = sort(suppDOF);
     suppVAL = suppVAL(order);
 else
     suppDOF = [];
     suppVAL = [];
-end 
+end
+end

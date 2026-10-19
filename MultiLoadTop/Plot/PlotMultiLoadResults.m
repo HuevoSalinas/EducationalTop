@@ -101,7 +101,7 @@ figure, hold on, grid on, box on
 plot(0:MaxIter,hist_V_plot,'LineWidth',1,'Color',[1.00 0.50 0.10])
 xlabel('iteration'), ylabel('volume fraction')
 ApplyLatexInterpreter(gcf)
-return 
+end
 
 function [] = PlotParetoFront3D(hist_J, hist_w, plot_type, color_on)
 TRIwidth = 1/sin(pi/3);
@@ -258,6 +258,8 @@ ApplyLatexInterpreter(gcf)
 
 
 
+end
+
 function [] = DrawWGrid(TRIwidth,ticks,ticksize)
 
 % W lines
@@ -288,4 +290,4 @@ for i=1:length(ticks)
         'HorizontalAlignment','right','Rotation',-60)
 end
 
-return
+end

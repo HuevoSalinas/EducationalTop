@@ -1,5 +1,5 @@
 function [MaxIter, hist_J, hist_V, x, rho, opt, fem] = ...
-    BoundConstrainedTOPSolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, optoutput)
+    BoundConstrainedTOPsolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, optoutput)
 
 % Initial parameters
 Ne = size(ELEM,1);           % Number of elements
@@ -30,19 +30,23 @@ upp = [];
 [func_E,func_dEdx] = GetTOPinterpFunc(opt.matmodel);
 
 % Create output dir if needed
-folder = extractBefore(optoutput.storefileprefix,strfind(optoutput.storefileprefix, filesep));
+[folder,name] = fileparts(optoutput.storefileprefix);
 if ~exist(folder, 'dir')
     mkdir(folder);
 end
 
 % Delete old output files
 if (optoutput.storefinal || optoutput.storeiters) % Delete previous data
-    pattern = fullfile(optoutput.storefileprefix, '*.mat');
+    pattern = fullfile(folder, [name '*.mat']);
     files = dir(pattern);
     if ~isempty(files)
         delete(pattern);
     end
 end
+
+opt.va = sum(fem.ve(opt.active)); % Volume of active elements
+opt.ve = fem.ve;                  % Element volume
+opt.v_func = @(x, opt)(sum((opt.H(opt.active,:) *x).*opt.ve(opt.active))/opt.va); % Volume function
 
 for iter=1:MaxIter
     % Continuation update (update filter matrix if needed)
@@ -60,7 +64,7 @@ for iter=1:MaxIter
     % FEM Analysis
     ke = pagemtimes(reshape(E,[1 1 Ne]),fem.k0);   % Penalized stiffness matrices
     fem.K = sparse(fem.indI(:),fem.indJ(:),ke(:)); % Assembled stiffness matrix 
-    fem = FEMsolve(fem,fem.solveMethod);           % Displacement computation
+    fem = FEMsolve(fem);           % Displacement computation
 
     % Objective function and sensitivity analysis
     dE_drho = func_dEdx(rho,opt.current_penal)*(opt.E0-opt.Emin); % Elasticity modulus sensitivity
@@ -106,9 +110,6 @@ for iter=1:MaxIter
            error('Unknown objective. Cannot solve.')
     end
     
-    opt.va = sum(fem.ve(opt.active)); % Volume of active elements
-    opt.ve = fem.ve;                  % Element volume
-    opt.v_func = @(x, opt)(sum((opt.H(opt.active,:) *x).*opt.ve(opt.active))/opt.va); % Volume function
     opt.v = opt.v_func(x, opt);       % Current volume 
     opt.dv = fem.ve /opt.va;          % Volume sensitivity
     opt.MdJ(~opt.active, :) = 0;      % Null sensitivity for passive elements
@@ -193,7 +194,7 @@ end
 
 % Save history data
 if (optoutput.storefinal || optoutput.storeiters)
-    J = NaN; 
+    J = NaN;
     hist_J(end) = NaN;
     hist_V(end) = NaN;
     filename = sprintf('%s%03.0f.mat',optoutput.storefileprefix,MaxIter);
@@ -202,4 +203,4 @@ if (optoutput.storefinal || optoutput.storeiters)
     save(filename,'NODE','ELEM','SUPP','LOAD','hist_J','hist_V');
 end
 
-return 
+end

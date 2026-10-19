@@ -13,4 +13,4 @@ Bs = zeros(1,2*size(dNdx,2)); % shear component of B matrix
 Bs(1,1:2:end) = dNdx(2,:);
 Bs(1,2:2:end) = dNdx(1,:);
   
-return
+end

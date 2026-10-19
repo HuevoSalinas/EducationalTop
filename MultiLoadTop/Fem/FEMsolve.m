@@ -1,7 +1,8 @@
-function [fem] = FEMsolve(fem,method)
-narginchk(1,2)
+function [fem] = FEMsolve(fem)
 
-if (nargin==1), method = 'direct'; end
+if ~isfield(fem,'solveMethod')
+    fem.solveMethod = 'direct';
+end
 
 % Initial parameters
 Ndof = size(fem.f,1); % number of degrees of freedom
@@ -13,7 +14,7 @@ fem.u = zeros(size(fem.f)); % displacement vector
 fem.u(fem.suppDOF,:) = repmat(fem.suppVAL, 1,Nf); % displacements in supports
 b = fem.f(fem.freeDOF,:) ...
   - repmat(fem.K(fem.freeDOF,fem.suppDOF)*fem.suppVAL, 1,Nf); % forces produced by support displacements
-switch lower(method)
+switch lower(fem.solveMethod)
     case 'direct'
         fem.K = (fem.K+fem.K')/2; % Enforce the symmetry of the matrix.
         fem.u(fem.freeDOF,:) = fem.K(fem.freeDOF,fem.freeDOF) \ b;
@@ -21,4 +22,8 @@ switch lower(method)
         error('Linear solve method is not supported')
 end
 
-return
+fem.r = fem.K(fem.suppDOF,:) * fem.u - fem.f(fem.suppDOF,:);
+Nn = Ndof / fem.DpN;
+fem.D = permute(reshape(fem.u,fem.DpN,Nn,Nf),[2,1,3]);
+
+end

@@ -20,3 +20,9 @@ More information can be found in the related article.
 
 Salinas D, Zegard T (2026) Structural topology optimization with multiple load cases: methods and
 review
+
+<table>
+<tr>
+<td><img src="Figures/MultiLoadTop.png" width="500"></td>
+</tr>
+</table>

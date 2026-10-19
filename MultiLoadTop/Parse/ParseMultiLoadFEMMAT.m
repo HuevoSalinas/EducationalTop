@@ -14,7 +14,7 @@ end
 fem.DpN = 2;
 Nfunc = @ShapeFuncQ4;
 dNfunc = @ShapeDerivQ4;
-intOrder = 1;
+intOrder = 2;
  
 [fem.CM,fem.ve] = GetElementCM2(NODE,ELEM,mat,Nfunc,dNfunc,intOrder);
 

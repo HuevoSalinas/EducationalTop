@@ -10,4 +10,4 @@ for i=1:DpN
     eDOF(:,i:DpN:end) = (DpN*ELEM) - (DpN-i);
 end 
 
-return
+end

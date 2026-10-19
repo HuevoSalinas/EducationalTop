@@ -13,4 +13,4 @@ switch upper(constLaw)
     otherwise
         error('Constitutive law is unknown')
 end
-return
+end

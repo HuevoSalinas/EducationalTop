@@ -3,6 +3,10 @@ narginchk(2,4)
 
 % Initial parameters 
 Ne = size(CM,1); % Number of elements
+if rmin <= 0
+    H = speye(Ne);
+    return
+end
 indI = cell(Ne,1);
 indJ = cell(Ne,1);
 indK = cell(Ne,1);

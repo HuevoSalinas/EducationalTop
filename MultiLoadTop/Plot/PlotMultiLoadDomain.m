@@ -42,8 +42,8 @@ if (nargin>=4 && ~isempty(LOAD))
         
     end
     colormap(palette)
-    ColorbarHand = colorbar;
-    set(ColorbarHand,'Ticks',(1/(2*Nl)):1/(Nl):1,'TickLabels',["Load " + string(1:Nl)])
+    CBhand = colorbar;
+    set(CBhand,'Ticks',(1/(2*Nl)):1/(Nl):1,'TickLabels',("Load " + string(1:Nl)))
 end
 
 PlotWindowLimits(NODE)

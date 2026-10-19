@@ -19,4 +19,4 @@ else
     L = sparse(1, Ndof);
 end 
 
-return
+end

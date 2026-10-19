@@ -1,5 +1,5 @@
 function [MaxIter, hist_J_comb, hist_V_comb, w_comb, x_comb, rho, opt, fem] = ...
-    ParetoSearchTOPSolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, optoutput)
+    ParetoSearchTOPsolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, optoutput)
 
 % Initial parameters
 Ne = size(ELEM,1);              % Number of elements
@@ -29,14 +29,14 @@ hist_J_comb = nan(Nw, MaxIter+1, No); % Objective history for each weight combin
 hist_V_comb = nan(Nw, MaxIter+1, 1 ); % Volume history for each weight combination 
 
 % Create output dir if needed
-folder = extractBefore(optoutput.storefileprefix,strfind(optoutput.storefileprefix, filesep));
+[folder,name] = fileparts(optoutput.storefileprefix);
 if ~exist(folder, 'dir')
     mkdir(folder);
 end
 
 % Delete old output files
 if (optoutput.storefinal || optoutput.storeiters) % Delete previous data
-    pattern = fullfile(optoutput.storefileprefix, '*.mat');
+    pattern = fullfile(folder, [name '*.mat']);
     files = dir(pattern);
     if ~isempty(files)
         delete(pattern);
@@ -50,7 +50,7 @@ for e = 1:Nw
     fprintf(' It.:%03.0f Weight\n',e);
    
     [MaxIter, hist_J, hist_V, ~, x, rho, opt, fem] = ...
-            VariableWeightTOPSolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, ...
+            VariableWeightTOPsolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, ...
                                   WupdateFunc, optoutput); % Variable weight optimization
     % Save weight data
     J_comb(e, :) = opt.MJ;
@@ -77,11 +77,10 @@ end
 
 % Save history data
 if (optoutput.storefinal || optoutput.storeiters)
-    J = NaN; 
-    filename = sprintf('%s%03.0f.mat',optoutput.storefileprefix,MaxIter);
-    save(filename,'rho','J');
+    filename = sprintf('%s.mat',optoutput.storefileprefix);
+    save(filename,'x_comb','J_comb','V_comb','w_comb');
     filename = sprintf('%sMESH.mat',optoutput.storefileprefix);
     save(filename,'NODE','ELEM','SUPP','LOAD','hist_J_comb','hist_V_comb','w_comb');
 end
 
-return 
+end

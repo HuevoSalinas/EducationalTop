@@ -5,4 +5,4 @@ pnorm = norm(opt.MJ, p);
 w = (opt.MJ/ pnorm)'.^(p-1);
 opt.J = pnorm;
 
-return
+end

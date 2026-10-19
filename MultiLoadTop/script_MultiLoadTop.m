@@ -27,7 +27,7 @@ constLaw = 'PS'; % Constitutive law for the element
  pass_solid, ... % Passive solid elements
  pass_void,...   % Passive void elements
  rmin] ...       % Filter radius 
-    = LoadMultiLoadOpt2DPlaneProblem(problemID); % Load problem 
+    = LoadMultiLoadOpt2DProblem(problemID); % Load problem
 % prob 1: Beam
 % prob 2: Bridge
 % prob 3: Building 
@@ -108,7 +108,7 @@ x(opt.pass_void) = opt.xmin;  % Density xmin for passive void elements
 %% == Optimization ========================================================
 % --- Topology optimization -----------------------------------------------
 [MaxIter, hist_J, hist_V, hist_w, x, rho, opt, fem] = ...
-    MultiLoadTOPSolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, optoutput);
+    MultiLoadTOPsolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, optoutput);
 
 % --- Optimization results ------------------------------------------------
 PlotMultiLoadResults(opt.combinationMethod, MaxIter, hist_J, hist_V, hist_w)

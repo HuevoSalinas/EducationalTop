@@ -1,5 +1,5 @@
 function [MaxIter, hist_J, hist_V, hist_w, x, rho, opt, fem] = ...
-    VariableWeightTOPSolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, WupdateFunc, optoutput)
+    VariableWeightTOPsolve(NODE, ELEM, SUPP, LOAD, fem, opt, x, WupdateFunc, optoutput)
 
 % Initial parameters
 Ne = size(ELEM,1);           % Number of elements
@@ -27,14 +27,14 @@ hist_w = nan(MaxIter+1, No);  % Weights history
 [func_E,func_dEdx] = GetTOPinterpFunc(opt.matmodel);
 
 % Create output dir if needed
-folder = extractBefore(optoutput.storefileprefix,strfind(optoutput.storefileprefix, filesep));
+[folder,name] = fileparts(optoutput.storefileprefix);
 if ~exist(folder, 'dir')
     mkdir(folder);
 end
 
 % Delete old output files
 if (optoutput.storefinal || optoutput.storeiters) % Delete previous data
-    pattern = fullfile(optoutput.storefileprefix, '*.mat');
+    pattern = fullfile(folder, [name '*.mat']);
     files = dir(pattern);
     if ~isempty(files)
         delete(pattern);
@@ -43,9 +43,13 @@ end
 
 % START ITERATION
 fprintf('=== ITERATIONS BEGIN... ===\n')
+opt.va = sum(fem.ve(opt.active)); % Volume of active elements
+opt.ve = fem.ve;                  % Element volume
+opt.v_func = @(x, opt)(sum((opt.H(opt.active,:) *x).*opt.ve(opt.active))/opt.va); % Volume function
+
 for iter=1:MaxIter
     % Continuation update (update filter matrix if needed)
-    opt = TOPcontinuation(fem,opt,iter); 
+    opt = TOPcontinuation(fem,opt,iter);
     rho = opt.H * x; % Filtered density variables
     E = opt.Emin + func_E(rho,opt.current_penal)*(opt.E0-opt.Emin); % Penalized modulus
 
@@ -58,7 +62,7 @@ for iter=1:MaxIter
     % FEM Analysis
     ke = pagemtimes(reshape(E,[1 1 Ne]),fem.k0);   % Penalized stiffness matrices
     fem.K = sparse(fem.indI(:),fem.indJ(:),ke(:)); % Assembled stiffness matrix 
-    fem = FEMsolve(fem,fem.solveMethod);           % Displacement computation
+    fem = FEMsolve(fem);           % Displacement computation
 
     % Objective function 
     switch opt.objective
@@ -99,9 +103,9 @@ for iter=1:MaxIter
                 J0 = squeeze(pagemtimes(pagemtimes(UT,K),U));
                 dJ(:, j) =  dE_drho.*-J0;
             end
-            opt.MdJ = dJ;
+            opt.dJ = dJ * w;
         case 'displacement'
-            dJ = zeros(Ne, Nl);
+            opt.dJ = zeros(Ne, 1);
             Kf = fem.K(fem.freeDOF, fem.freeDOF);
             [L,~,s] = chol(Kf,'lower','vector');
             K = fem.k0;
@@ -118,26 +122,19 @@ for iter=1:MaxIter
                 U = permute(uj(fem.edof),[2 1 3]);
                 LT = lambda(fem.edof);
                 J0 = squeeze(pagemtimes(pagemtimes(LT,K),U));
-                ind1 = sum(No_list(1:j-1))+1;
-                ind2 = sum(No_list(1:j));
-                dJ(:, ind1:ind2) = repmat( dE_drho.*-J0/sum(w(ind1:ind2)),1,ind2+1-ind1);
+                opt.dJ = opt.dJ - dE_drho .* J0;
             end
-            opt.MdJ = dJ;
         otherwise
            error('Unknown objective. Cannot solve.')
     end
      
-    opt.va = sum(fem.ve(opt.active)); % Volume of active elements
-    opt.ve = fem.ve;                  % Element volume
-    opt.v_func = @(x, opt)(sum((opt.H(opt.active,:) *x).*opt.ve(opt.active))/opt.va); % Volume function
     opt.v = opt.v_func(x, opt);       % Current volume 
     opt.dv = fem.ve /opt.va;          % Volume sensitivity
-    opt.MdJ(~opt.active, :) = 0;      % Null sensitivity for passive elements
+    opt.dJ(~opt.active) = 0;      % Null sensitivity for passive elements
 
-    opt.MdJ = opt.H' * opt.MdJ;       % Objectives sensitivities considering filter
+    opt.dJ = opt.H' * opt.dJ;       % Objectives sensitivities considering filter
     opt.dv = opt.H' * opt.dv;         % Volume sensitivities considering filter
 
-    opt.dJ = opt.MdJ * w;             % Objective cumulative sensitivity
 
     % Design variables update
     opt.xLB = max(opt.xmin,x-opt.current_move); % Design variables lower bound
@@ -167,7 +164,7 @@ end
 
 % Save history data
 if (optoutput.storefinal || optoutput.storeiters)
-    J = NaN; 
+    J = NaN;
     hist_J(end) = NaN;
     hist_V(end) = NaN;
     filename = sprintf('%s%03.0f.mat',optoutput.storefileprefix,MaxIter);
@@ -176,4 +173,4 @@ if (optoutput.storefinal || optoutput.storeiters)
     save(filename,'NODE','ELEM','SUPP','LOAD','hist_J','hist_V','hist_w');
 end
 
-return 
+end
