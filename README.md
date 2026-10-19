@@ -6,7 +6,7 @@ For now, the following developments are included:
 
 ### 1) [ShapeTop](./ShapeTop/)
 
-ShapeTop implements a shape optimization approach based on constrained density-based topology optimization. The method allows the optimization of structural shapes in both 2D and 3D domains.
+ShapeTop implements a shape optimization approach based on constrained density-based topology optimization for 2D structures.
 
 <table>
 <tr>
