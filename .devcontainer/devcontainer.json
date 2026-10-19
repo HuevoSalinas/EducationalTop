@@ -1,0 +1,14 @@
+{
+  "name": "EducationalTop",
+  "customizations": {
+    "codespaces": {
+      "repositories": {
+        "HuevoSalinas/MultiLoadTop": {
+          "permissions": {
+            "contents": "read"
+          }
+        }
+      }
+    }
+  }
+}
