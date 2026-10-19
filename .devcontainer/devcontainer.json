@@ -7,6 +7,11 @@
           "permissions": {
             "contents": "read"
           }
+        },
+        "HuevoSalinas/ShapeTop": {
+          "permissions": {
+            "contents": "read"
+          }
         }
       }
     }
